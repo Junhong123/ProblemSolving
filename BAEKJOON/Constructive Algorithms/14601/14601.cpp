@@ -75,12 +75,13 @@ void fill_4(int x1, int x2, int y1, int y2, int s_x, int s_y)
     }
 
     cnt++;
+
+    return;
 }
 
 void fill_16(int x1, int x2, int y1, int y2, int s_x, int s_y)
 {
     auto [nx1, nx2, ny1, ny2] = make_box(s_x, s_y, true);
-
     fill_4(nx1, nx2, ny1, ny2, s_x, s_y);
 
     int m_x, m_y;
@@ -108,6 +109,8 @@ void fill_16(int x1, int x2, int y1, int y2, int s_x, int s_y)
             }
         }
     }
+
+    return;
 }
 
 void solve(int x1, int x2, int y1, int y2, int s_x, int s_y)
@@ -115,28 +118,54 @@ void solve(int x1, int x2, int y1, int y2, int s_x, int s_y)
     int size = x2 - x1 + 1;
     if (size > 4)
     {
-        pair<int, int> x[2] = {{x1, x2 / 2}, {x2 / 2, x2}};
-        pair<int, int> y[2] = {{y1, y2 / 2}, {y2 / 2, y2}};
+        pair<int, int> x[2] = {{x1, (x1 + x2) / 2}, {(x1 + x2) / 2 + 1, x2}};
+        pair<int, int> y[2] = {{y1, (y1 + y2) / 2}, {(y1 + y2) / 2 + 1, y2}};
         pair<int, int> tmp;
         for (int i = 0; i < 2; i++)
         {
             for (int j = 0; j < 2; j++)
             {
-                if (s_x > x[i].first && s_x < x[i].second && s_y > y[j].first && s_y < y[j].second)
+                if (s_x >= x[i].first && s_x <= x[i].second && s_y >= y[j].first && s_y <= y[j].second)
                 {
-                    solve(x[i].first, x[i].second, y[j].first, y[i].second, s_x, s_y);
-                    tmp = {s_x, s_y};
+                    solve(x[i].first, x[i].second, y[j].first, y[j].second, s_x, s_y);
+                    if (i == 0 && j == 0)
+                        tmp = {x[i].second, y[j].second};
+                    else if (i == 0 && j == 1)
+                        tmp = {x[i].second, y[j].first};
+                    else if (i == 1 && j == 0)
+                        tmp = {x[i].first, y[j].second};
+                    else if (i == 1 && j == 1)
+                        tmp = {x[i].first, y[j].first};
+                    auto [nx1, nx2, ny1, ny2] = make_box(tmp.first, tmp.second, false);
+                    fill_4(nx1, nx2, ny1, ny2, tmp.first, tmp.second);
                 }
                 else
                 {
+                    if (i == 0 && j == 0)
+                        solve(x[i].first, x[i].second, y[j].first, y[j].second, x[i].second, y[j].second);
+                    else if (i == 0 && j == 1)
+                        solve(x[i].first, x[i].second, y[j].first, y[j].second, x[i].second, y[j].first);
+                    else if (i == 1 && j == 0)
+                        solve(x[i].first, x[i].second, y[j].first, y[j].second, x[i].first, y[j].second);
+                    else if (i == 1 && j == 1)
+                        solve(x[i].first, x[i].second, y[j].first, y[j].second, x[i].first, y[j].first);
                 }
             }
         }
     }
+    else
+    {
+        fill_16(x1, x2, y1, y2, s_x, s_y);
+    }
+
+    return;
 }
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
     int k, x, y;
     cin >> k >> x >> y;
 
@@ -150,7 +179,7 @@ int main()
     }
     else
     {
-        fill_16(1, size, 1, size, x, y);
+        solve(1, size, 1, size, x, y);
     }
 
     for (int i = size; i > 0; i--)
