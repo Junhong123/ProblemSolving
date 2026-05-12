@@ -9,7 +9,7 @@ int main() {
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < n; ++j) {
             cout << cnt << " ";
-            if(++cnt == 10) cnt = 1;
+            cnt = ++cnt == 10 ? 1 : cnt;
         }
         cout << "\n";
     }
